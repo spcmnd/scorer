@@ -1,6 +1,6 @@
 table! {
     players (id) {
-        id -> Integer,
+        id -> Varchar,
         name -> Varchar,
     }
 }
