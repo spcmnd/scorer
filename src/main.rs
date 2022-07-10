@@ -9,7 +9,7 @@ mod services;
 use actix_web::{middleware::Logger, web, App, HttpServer};
 use api::{
     hello::hello,
-    player::{get_players, post_player},
+    player::{delete_player, get_players, post_player, put_player},
 };
 use diesel::{
     r2d2::{ConnectionManager, Pool},
@@ -41,7 +41,9 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/api")
                     .service(hello)
                     .service(post_player)
-                    .service(get_players),
+                    .service(get_players)
+                    .service(put_player)
+                    .service(delete_player),
             )
     })
     .bind(("127.0.0.1", 1337))?

@@ -8,3 +8,13 @@ pub struct Player {
     pub id: String,
     pub name: String,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct PlayerRequestBody {
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct PlayerUpdateRequestBody {
+    pub name: String,
+}
