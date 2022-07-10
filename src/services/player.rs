@@ -17,5 +17,15 @@ pub fn insert_new_player(
         .values(&player)
         .execute(&conn)?;
 
+    // TODO: Handle error like unique constraints
+
     Ok(player)
+}
+
+pub fn select_all_players(
+    conn: PooledConnection<ConnectionManager<MysqlConnection>>,
+) -> Result<Vec<Player>, diesel::result::Error> {
+  use crate::schema::players::dsl::*;
+
+  players.load::<Player>(&conn)
 }

@@ -7,7 +7,10 @@ mod schema;
 mod services;
 
 use actix_web::{middleware::Logger, web, App, HttpServer};
-use api::{hello::hello, player::post_player};
+use api::{
+    hello::hello,
+    player::{get_players, post_player},
+};
 use diesel::{
     r2d2::{ConnectionManager, Pool},
     MysqlConnection,
@@ -34,7 +37,12 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(Logger::default())
             .app_data(web::Data::new(pool.clone()))
-            .service(web::scope("/api").service(hello).service(post_player))
+            .service(
+                web::scope("/api")
+                    .service(hello)
+                    .service(post_player)
+                    .service(get_players),
+            )
     })
     .bind(("127.0.0.1", 1337))?
     .run()

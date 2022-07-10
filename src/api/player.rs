@@ -1,4 +1,4 @@
-use actix_web::{post, web, Error, HttpResponse};
+use actix_web::{get, post, web, Error, HttpResponse};
 use diesel::{
     r2d2::{ConnectionManager, Pool},
     MysqlConnection,
@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::models::player::Player;
-use crate::services::player::insert_new_player;
+use crate::services::player::{insert_new_player, select_all_players};
 
 type DbPool = Pool<ConnectionManager<MysqlConnection>>;
 
@@ -32,4 +32,14 @@ pub async fn post_player(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok().json(player))
+}
+
+#[get("/player")]
+pub async fn get_players(pool: web::Data<DbPool>) -> Result<HttpResponse, Error> {
+    let db_conn = pool.get().expect("Couldn't get db connection from pool");
+    let players = web::block(|| select_all_players(db_conn))
+        .await?
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    Ok(HttpResponse::Ok().json(players))
 }
