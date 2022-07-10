@@ -1,32 +1,19 @@
 use actix_web::{post, web, Error, HttpResponse};
 use diesel::{
-    r2d2::{ConnectionManager, Pool, PooledConnection},
-    MysqlConnection, RunQueryDsl,
+    r2d2::{ConnectionManager, Pool},
+    MysqlConnection,
 };
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::models::player;
+use crate::models::player::Player;
+use crate::services::player::insert_new_player;
 
 type DbPool = Pool<ConnectionManager<MysqlConnection>>;
-type DbError = Box<dyn std::error::Error + Send + Sync>;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlayerRequestBody {
     name: String,
-}
-
-fn insert_new_player(
-    player: player::Player,
-    conn: PooledConnection<ConnectionManager<MysqlConnection>>,
-) -> Result<player::Player, DbError> {
-    use crate::schema::players::dsl::*;
-
-    diesel::insert_into(players)
-        .values(&player)
-        .execute(&conn)?;
-
-    Ok(player)
 }
 
 #[post("/player")]
@@ -34,7 +21,7 @@ pub async fn post_player(
     pool: web::Data<DbPool>,
     body: web::Json<PlayerRequestBody>,
 ) -> Result<HttpResponse, Error> {
-    let new_player = player::Player {
+    let new_player = Player {
         id: Uuid::new_v4().to_string(),
         name: body.into_inner().name,
     };

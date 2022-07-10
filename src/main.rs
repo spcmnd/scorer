@@ -4,6 +4,7 @@ extern crate diesel;
 mod api;
 mod models;
 mod schema;
+mod services;
 
 use actix_web::{middleware::Logger, web, App, HttpServer};
 use api::{hello::hello, player::post_player};
