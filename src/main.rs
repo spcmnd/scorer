@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate diesel;
+extern crate validator;
 
 mod api;
 mod models;

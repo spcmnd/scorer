@@ -1,5 +1,6 @@
 use diesel::Queryable;
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
 use crate::schema::players;
 
@@ -9,12 +10,14 @@ pub struct Player {
     pub name: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Validate)]
 pub struct PlayerRequestBody {
-    pub name: String,
+    #[validate(required, length(min = 3, max = 32))]
+    pub name: Option<String>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Validate)]
 pub struct PlayerUpdateRequestBody {
-    pub name: String,
+    #[validate(required, length(min = 3, max = 32))]
+    pub name: Option<String>,
 }

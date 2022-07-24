@@ -3,7 +3,7 @@ use diesel::{
     ExpressionMethods, MysqlConnection, QueryDsl, RunQueryDsl,
 };
 
-use crate::models::player::{Player, PlayerUpdateRequestBody};
+use crate::models::player::Player;
 
 type DbError = Box<dyn std::error::Error + Send + Sync>;
 
@@ -31,15 +31,14 @@ pub fn select_all_players(
 }
 
 pub fn update_player(
-    existing_player_uuid: String,
-    update_request: PlayerUpdateRequestBody,
+    updated_player: Player,
     conn: PooledConnection<ConnectionManager<MysqlConnection>>,
 ) -> Result<usize, diesel::result::Error> {
     use crate::schema::players::dsl::*;
 
-    let player = players.filter(id.eq(existing_player_uuid));
+    let player = players.filter(id.eq(updated_player.id));
     let result = diesel::update(player)
-        .set(name.eq(update_request.name))
+        .set(name.eq(updated_player.name))
         .execute(&conn);
 
     result

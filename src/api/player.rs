@@ -4,6 +4,7 @@ use diesel::{
     MysqlConnection,
 };
 use uuid::Uuid;
+use validator::Validate;
 
 use crate::models::player::{Player, PlayerRequestBody, PlayerUpdateRequestBody};
 use crate::services::player::{
@@ -17,10 +18,20 @@ pub async fn post_player(
     pool: web::Data<DbPool>,
     body: web::Json<PlayerRequestBody>,
 ) -> Result<HttpResponse, Error> {
+    match body.validate() {
+        Ok(_) => (),
+        Err(e) => return Ok(HttpResponse::BadRequest().json(e)),
+    };
+
+    let player_request_body = body.into_inner();
     let new_player = Player {
         id: Uuid::new_v4().to_string(),
-        name: body.into_inner().name,
+        name: match player_request_body.name {
+            Some(name) => name,
+            None => String::new()
+        },
     };
+
     let db_conn = pool.get().expect("Couldn't get db connection from pool");
 
     let player = web::block(move || insert_new_player(new_player, db_conn))
@@ -46,10 +57,24 @@ pub async fn put_player(
     path: web::Path<String>,
     body: web::Json<PlayerUpdateRequestBody>,
 ) -> Result<HttpResponse, Error> {
+    match body.validate() {
+        Ok(_) => (),
+        Err(e) => return Ok(HttpResponse::BadRequest().json(e)),
+    };
+
     let db_conn = pool.get().expect("Couldn't get db connection from pool");
     let id = path.into_inner();
     let update_request = body.into_inner();
-    let _result = web::block(|| update_player(id, update_request, db_conn)).await?;
+
+    let updated_player = Player {
+        id,
+        name: match update_request.name {
+            Some(name) => name,
+            None => String::new()
+        }
+    };
+
+    let _result = web::block(|| update_player(updated_player, db_conn)).await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
